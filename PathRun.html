@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PathRun | P2P Travel-Based Delivery Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc;
+            scroll-behavior: smooth;
+        }
+        .text-gradient {
+            background-image: linear-gradient(to right, #1d4ed8, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(13, 22, 33, 0.08);
+        }
+        /* Custom styles for the workflow diagram */
+        .step-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .step-card:hover {
+            transform: translateY(-4px);
+        }
+        .connector {
+            position: relative;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .arrow-down {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #4f46e5; /* Indigo */
+            margin-top: 0.5rem;
+        }
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .upload-area:hover {
+            border-color: #60a5fa;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation Bar -->
+    <header class="bg-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <!-- Logo: Simple PathRun Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <h1 class="text-2xl font-extrabold text-gray-900">Path<span class="text-green-600">Run</span></h1>
+            </div>
+            <nav id="main-nav" class="flex space-x-4 sm:space-x-8 text-gray-600 font-medium">
+                <!-- "Home" link added for navigation back from other pages -->
+                <a href="#" onclick="showHomePage(event)" class="hover:text-green-600 transition duration-150 hidden md:block" id="nav-home">Home</a>
+                <!-- "How It Works" now triggers the new page view -->
+                <a href="#" onclick="showWorkflowPage(event)" class="hover:text-green-600 transition duration-150" id="nav-how">How It Works</a>
+                <!-- Updated 'For Agents' link to show the new dedicated page -->
+                <a href="#" onclick="showTrustPage(event)" class="hover:text-green-600 transition duration-150 hidden md:block" id="nav-trust">Trust & Safety</a>
+                <a href="#download" onclick="scrollToSection(event, 'download')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-150">Get the App</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN LANDING PAGE CONTENT (Initially shown) -->
+    <div id="home-view">
+        <!-- Hero Section -->
+        <section class="py-16 md:py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-4xl sm:text-6xl font-extrabold tracking-tight mb-4">
+                    Low-Cost, Hyper-Local Delivery.
+                    <span class="text-gradient block">Powered by Daily Commuters.</span>
+                </h2>
+                <p class="mt-4 max-w-3xl mx-auto text-xl text-gray-500 mb-8">
+                    PathRun leverages existing travel routes to get your local shop purchases delivered <b class="font-bold">faster and cheaper</b> than traditional logistics.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <!-- Updated to show the new request form -->
+                    <a href="#" onclick="showRequestForm(event)" class="w-full sm:w-auto px-8 py-3 text-lg font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition duration-300 shadow-lg">
+                        Request delivery
+                    </a>
+                    <!-- Updated to show the new Agent application page -->
+                    <a href="#" onclick="showAgentApplicationPage(event)" class="w-full sm:w-auto px-8 py-3 text-lg font-semibold rounded-xl text-blue-600 bg-blue-100 hover:bg-blue-200 transition duration-300">
+                        Become a PathRunner (Agent)
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section (Three-Party Model Summary) -->
+        <section id="how-summary" class="py-16 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h3 class="text-3xl font-bold text-center mb-12 text-gray-900">The PathRun Three-Party Advantage</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    
+                    <!-- Requester Card -->
+                    <div class="bg-white p-6 rounded-2xl card-shadow text-center border-t-4 border-blue-600">
+                        <div class="h-16 w-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-3xl" role="img" aria-label="Customer">🛍️</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">1. The Requester (Customer)</h4>
+                        <p class="text-gray-600">Needs any product bought from a specific local shop and delivered along a commuter route.</p>
+                    </div>
+
+                    <!-- Vendor Card -->
+                    <div class="bg-white p-6 rounded-2xl card-shadow text-center border-t-4 border-green-600">
+                        <div class="h-16 w-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-3xl" role="img" aria-label="Shop">🏬</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">2. The Vendor (Shop)</h4>
+                        <p class="text-gray-600">Supplies the product locally. No deep digital integration required, making acceptance simple.</p>
+                    </div>
+
+                    <!-- Traveler/Agent Card -->
+                    <div class="bg-white p-6 rounded-2xl card-shadow text-center border-t-4 border-yellow-500">
+                        <div class="h-16 w-16 mx-auto bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-3xl" role="img" aria-label="Commuter">🛵</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">3. The Traveler (Agent)</h4>
+                        <p class="text-gray-600">A daily commuter who buys and delivers the item as a commission-based task en route.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust & Safety Section (Summary on Home Page) -->
+        <section id="trust-summary" class="py-16 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <span class="text-sm font-semibold text-blue-600 uppercase">Built on Trust</span>
+                <h3 class="text-3xl font-bold text-gray-900 mt-2 mb-4">Peace of Mind for Every Order</h3>
+                <p class="max-w-3xl mx-auto text-gray-600 mb-8">
+                    PathRun utilizes a secure Escrow system and mandatory Agent vetting to protect every transaction. Agents are held fully responsible for item integrity from the moment of purchase to delivery.
+                </p>
+                <a href="#" onclick="showTrustPage(event)" class="inline-block px-8 py-3 text-lg font-semibold rounded-xl text-white bg-green-600 hover:bg-green-700 transition duration-300 shadow-lg">
+                    View Our Full Policy
+                </a>
+            </div>
+        </section>
+        
+        <!-- Agent Call to Action Section (Summary) -->
+        <section id="agents-cta" class="py-16 bg-blue-600">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+                <h3 class="text-4xl font-extrabold mb-4">Leverage Your Commute. Earn on the Go.</h3>
+                <p class="text-xl max-w-4xl mx-auto mb-8 opacity-90">
+                    Are you a daily commuter? Become a PathRun Agent and turn your routine travel into a revenue stream. We match local requests perfectly along your registered route and schedule.
+                </p>
+                <div class="flex justify-center space-x-6 text-left">
+                    <div class="bg-white text-gray-900 p-4 rounded-lg flex items-center space-x-3 w-64">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2h-1v2.586a1 1 0 01-1.707.707l-3.5-3.5a1 1 0 010-1.414l3.5-3.5A1 1 0 0111 8h1z" />
+                        </svg>
+                        <p class="font-medium">Cover Daily Travel Expenses</p>
+                    </div>
+                    <div class="bg-white text-gray-900 p-4 rounded-lg flex items-center space-x-3 w-64 hidden sm:flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="font-medium">No Dedicated Delivery Time</p>
+                    </div>
+                </div>
+                
+                <a href="#" onclick="showAgentApplicationPage(event)" class="mt-8 inline-block px-10 py-4 text-xl font-bold rounded-xl text-blue-600 bg-white hover:bg-gray-100 transition duration-300 shadow-xl">
+                    View Roles & Start Application
+                </a>
+            </div>
+        </section>
+
+        <!-- Download Section -->
+        <section id="download" class="py-16 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h3 class="text-4xl font-extrabold text-gray-900 mb-4">Get PathRun. Start Running Local Deliveries.</h3>
+                <p class="text-xl text-gray-500 mb-10">Download the dedicated app for Requesters and Agents.</p>
+
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-8">
+                    
+                    <!-- Google Play Button -->
+                    <a href="#" class="inline-flex items-center justify-center bg-gray-900 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 w-64">
+                        <svg class="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M1.38 3.59c0-.49.33-.87.82-.99l19.57-4.66c.49-.12.98.05 1.25.44.27.38.21.88-.14 1.2l-5.6 4.95 5.6 4.95c.35.32.41.83.14 1.21-.27.38-.76.55-1.25.43L2.2 21.39c-.49-.12-.82-.5-.82-.99V3.59zM3.46 5.86v12.28L19.2 12 3.46 5.86z"/></svg>
+                        <div>
+                            <div class="text-xs">GET IT ON</div>
+                            <div class="text-xl font-bold -mt-1">Google Play</div>
+                        </div>
+                    </a>
+
+                    <!-- Apple App Store Button -->
+                    <a href="#" class="inline-flex items-center justify-center bg-gray-900 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 w-64">
+                        <svg class="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.8 14.7c-.52.54-1.27.86-2.07.86-.74 0-1.4-.28-1.92-.76-.52.5-1.2.76-1.96.76-.8 0-1.55-.32-2.07-.86-.52-.54-.86-1.27-.86-2.07 0-.74.28-1.4.76-1.92-.5-.52-.76-1.2-.76-1.96 0-.8.32-1.55.86-2.07.54-.52 1.27-.86 2.07-.86.74 0 1.4.28 1.92.76.52-.5 1.2-.76 1.96-.76.8 0 1.55.32 2.07.86.52.54.86 1.27.86 2.07z"/></svg>
+                        <div>
+                            <div class="text-xs">Download on the</div>
+                            <div class="text-xl font-bold -mt-1">App Store</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- DEDICATED REQUEST FORM VIEW -->
+    <div id="request-form-view" class="hidden py-16">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+            <button onclick="showHomePage(event)" class="text-blue-600 hover:text-blue-800 flex items-center mb-8 font-medium transition duration-150">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Home
+            </button>
+
+            <div class="bg-white p-6 sm:p-10 rounded-2xl card-shadow border-t-4 border-blue-600">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Place a New Delivery Request</h2>
+                <p class="text-gray-500 mb-8">Tell us what you need, where to buy it, and where to drop it off.</p>
+
+                <form id="delivery-request-form" onsubmit="handleRequestSubmit(event)">
+                    <div class="space-y-6">
+                        
+                        <!-- Product Name -->
+                        <div>
+                            <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                            <input type="text" id="product-name" name="product-name" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="e.g., Artisan Bread Loaf or 5kg Bag of Rice">
+                        </div>
+
+                        <!-- Shop Name (Optional) -->
+                        <div>
+                            <label for="shop-name" class="block text-sm font-medium text-gray-700 mb-1">Shop Name (Optional)</label>
+                            <input type="text" id="shop-name" name="shop-name" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="e.g., City Bakery or Local Grocer">
+                        </div>
+
+                        <!-- Quantity -->
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                            <input type="number" id="quantity" name="quantity" min="1" required value="1" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                        </div>
+
+                        <!-- Location (Google Autocomplete Dropdown) -->
+                        <div>
+                            <label for="location-input" class="block text-sm font-medium text-gray-700 mb-1">Drop-off Location (Street Address/Landmark)</label>
+                            <input type="text" id="location-input" name="location" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="Start typing your address for suggestions...">
+                        </div>
+                    </div>
+                    
+                    <!-- Agent Availability and Submit Button -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="mb-4 text-center">
+                            <p class="text-lg font-semibold text-gray-700">Available PathRun Agents in your area:</p>
+                            <p class="text-4xl font-extrabold text-green-600 mt-1" data-testid="agent-count" id="agent-count">...</p>
+                        </div>
+                        
+                        <button type="submit" class="w-full px-8 py-4 text-xl font-bold rounded-xl text-white bg-green-600 hover:bg-green-700 transition duration-300 shadow-lg disabled:bg-gray-400" disabled id="submit-button">
+                            Submit Request & Get Quote
+                        </button>
+                        <p class="text-center text-xs text-gray-500 mt-2">The quote will include the item cost + Traveler Fee (TF).</p>
+                        <div id="status-message" class="mt-4 p-3 hidden rounded-lg text-center" role="alert"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEDICATED AGENT APPLICATION VIEW (Updated with Roles & Responsibilities) -->
+    <div id="agent-application-view" class="hidden py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <button onclick="showHomePage(event)" class="text-blue-600 hover:text-blue-800 flex items-center mb-8 font-medium transition duration-150">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Home
+            </button>
+
+            <h2 class="text-4xl font-extrabold text-center mb-4 text-gray-900">
+                PathRun Agent Application
+            </h2>
+            <p class="text-center text-xl text-gray-500 mb-8 max-w-2xl mx-auto">
+                Review the commitment below, then fill out the form to register your commute profile.
+            </p>
+
+            <!-- 1. CORE ROLE DEFINITION (New Detailed Content) -->
+            <div class="bg-white p-6 rounded-2xl card-shadow border-t-4 border-green-600 mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Agent Roles & Responsibilities</h3>
+                
+                <h4 class="text-xl font-semibold text-gray-800 mb-2">The Responsibility Chain</h4>
+                <ul class="list-disc list-inside space-y-3 text-gray-700 ml-4">
+                    <li>
+                        <b class="font-bold text-blue-600">Purchase & Verification:</b> You must **personally purchase** the exact item specified by the Requester from the correct Vendor (shop). Immediately upload a clear, legible digital **receipt/invoice** for reimbursement verification.
+                    </li>
+                    <li>
+                        <b class="font-bold text-blue-600">Delivery Commitment:</b> The item must be delivered precisely within the **committed time window** you registered (e.g., 6:00 AM - 9:00 AM). Delays risk cancellation and poor ratings.
+                    </li>
+                    <li>
+                        <b class="font-bold text-red-600">Full Liability:</b> You hold **full contractual liability** for the item's integrity from the moment of purchase until the Requester confirms receipt. Any damage, loss, or incorrect items are your responsibility.
+                    </li>
+                    <li>
+                        <b class="font-bold text-green-600">Escrow Dependency:</b> Your reimbursement for the item cost, plus your Traveler Fee (commission), is held in our Escrow system. This payment is only **INSTANTLY RELEASED** upon the Requester entering the final **OTP/PIN** confirmation code.
+                    </li>
+                </ul>
+
+                <h4 class="text-xl font-semibold text-gray-800 mt-6 mb-2">Be Careful: Your Commitment is Key</h4>
+                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg">
+                    <p class="font-medium">
+                        **Errors Delay Payment:** If verification fails (blurry receipt, wrong item) or delivery is refused due to damage, the Escrow release is halted for manual review, significantly delaying your payment. <b class="font-bold">Accuracy and care ensure instant reimbursement and commission.</b>
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2. AGENT APPLICATION FORM -->
+            <form id="agent-registration-form" onsubmit="handleAgentSubmit(event)" class="bg-white p-8 rounded-2xl card-shadow border-t-4 border-blue-600">
+                <h3 class="text-2xl font-bold text-gray-900 mb-8">Personal & Commute Details</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- PERSONAL DETAILS -->
+                    <div class="md:col-span-2">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">1. Personal & Contact</h4>
+                    </div>
+
+                    <div>
+                        <label for="agent-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="agent-name" name="agent_name" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="John Doe">
+                    </div>
+
+                    <div>
+                        <label for="agent-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number (10 digits)</label>
+                        <input type="tel" id="agent-phone" name="agent_phone" required pattern="[0-9]{10}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="9876543210">
+                    </div>
+
+                    <!-- COMMUTE DETAILS -->
+                    <div class="md:col-span-2 mt-4">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">2. Commute & Availability</h4>
+                    </div>
+                    
+                    <div>
+                        <label for="travel-from" class="block text-sm font-medium text-gray-700 mb-1">Travelling From (Start Point)</label>
+                        <input type="text" id="travel-from" name="travel_from" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="e.g., Home Address/Zone A">
+                    </div>
+                    
+                    <div>
+                        <label for="travel-to" class="block text-sm font-medium text-gray-700 mb-1">Travelling To (End Point)</label>
+                        <input type="text" id="travel-to" name="travel_to" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="e.g., Office/University/Zone B">
+                    </div>
+
+                    <div>
+                        <label for="travel-time" class="block text-sm font-medium text-gray-700 mb-1">Typical Travel Time (e.g., Morning commute)</label>
+                        <select id="travel-time" name="travel_time" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150 bg-white">
+                            <option value="">Select Time Slot</option>
+                            <option value="0600-0900">Morning (06:00 - 09:00)</option>
+                            <option value="0900-1200">Late Morning (09:00 - 12:00)</option>
+                            <option value="1200-1500">Lunch/Midday (12:00 - 15:00)</option>
+                            <option value="1500-1800">Afternoon (15:00 - 18:00)</option>
+                            <option value="1800-2100">Evening (18:00 - 21:00)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="working-days" class="block text-sm font-medium text-gray-700 mb-1">Primary Working Days</label>
+                        <select id="working-days" name="working_days" required multiple class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150 bg-white h-32">
+                            <option value="Mon-Fri">Monday to Friday</option>
+                            <option value="Mon-Sat">Monday to Saturday</option>
+                            <option value="Weekends">Weekends Only</option>
+                            <option value="Daily">7 Days a Week</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple if needed.</p>
+                    </div>
+
+                    <!-- VERIFICATION DOCUMENTS -->
+                    <div class="md:col-span-2 mt-4">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">3. Identity & Address Verification (Mandatory Vetting)</h4>
+                    </div>
+
+                    <!-- ID Proof Upload -->
+                    <div>
+                        <label for="id-proof" class="block text-sm font-medium text-gray-700 mb-1">Aadhaar Card / Voter ID (Front & Back)</label>
+                        <div class="upload-area">
+                            <input type="file" id="id-proof" name="id_proof" accept=".pdf,image/*" required class="hidden" onchange="updateFileName('id-proof-name', this.files)">
+                            <label for="id-proof" class="block cursor-pointer text-blue-600 hover:underline">
+                                Click to Upload ID Proof
+                            </label>
+                            <p id="id-proof-name" class="text-xs text-gray-500 mt-1 truncate">No file selected.</p>
+                        </div>
+                    </div>
+
+                    <!-- Profile Photo Upload -->
+                    <div>
+                        <label for="photo-upload" class="block text-sm font-medium text-gray-700 mb-1">Agent Profile Photo (Clear headshot)</label>
+                        <div class="upload-area">
+                            <input type="file" id="photo-upload" name="photo_upload" accept="image/*" required class="hidden" onchange="updateFileName('photo-upload-name', this.files)">
+                            <label for="photo-upload" class="block cursor-pointer text-blue-600 hover:underline">
+                                Click to Upload Photo
+                            </label>
+                            <p id="photo-upload-name" class="text-xs text-gray-500 mt-1 truncate">No file selected.</p>
+                        </div>
+                    </div>
+
+                    <!-- Permanent Address -->
+                    <div class="md:col-span-2">
+                        <label for="permanent-address" class="block text-sm font-medium text-gray-700 mb-1">Permanent Address</label>
+                        <textarea id="permanent-address" name="permanent_address" rows="3" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="Full street address, city, and postal code."></textarea>
+                    </div>
+
+                    <!-- Address Proof Upload -->
+                    <div class="md:col-span-2">
+                        <label for="address-proof" class="block text-sm font-medium text-gray-700 mb-1">Address Proof (EB Bill or Water Bill - Last 3 months)</label>
+                        <div class="upload-area">
+                            <input type="file" id="address-proof" name="address_proof" accept=".pdf,image/*" required class="hidden" onchange="updateFileName('address-proof-name', this.files)">
+                            <label for="address-proof" class="block cursor-pointer text-blue-600 hover:underline">
+                                Click to Upload Address Proof
+                            </label>
+                            <p id="address-proof-name" class="text-xs text-gray-500 mt-1 truncate">No file selected.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submission Section -->
+                <div class="mt-10 pt-6 border-t border-gray-200">
+                    <button type="submit" class="w-full px-8 py-4 text-xl font-bold rounded-xl text-white bg-green-600 hover:bg-green-700 transition duration-300 shadow-lg">
+                        Submit Agent Application
+                    </button>
+                    <div id="agent-status-message" class="mt-4 p-3 hidden rounded-lg text-center" role="alert"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- DEDICATED WORKFLOW PAGE -->
+    <div id="workflow-view" class="hidden py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <button onclick="showHomePage(event)" class="text-blue-600 hover:text-blue-800 flex items-center mb-8 font-medium transition duration-150">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Home
+            </button>
+
+            <h2 class="text-4xl font-extrabold text-center mb-4 text-gray-900">
+                The PathRun Journey: <span class="text-gradient">Request to Release</span>
+            </h2>
+            <p class="text-center text-xl text-gray-500 mb-12 max-w-2xl mx-auto">
+                A simple, secure, 7-step process powered by commuters and protected by our Escrow system.
+            </p>
+
+            <div class="space-y-8">
+                
+                <!-- STEP 1: Request -->
+                <div class="step-card border-l-4 border-blue-600">
+                    <div class="flex items-start">
+                        <span class="text-3xl font-extrabold text-blue-600 mr-4">01</span>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-900">Requester Posts Task</h4>
+                            <p class="text-gray-600">The customer specifies the <b class="font-semibold">pick-up shop, item details, drop-off location</b>, and agrees to the item cost + calculated <b class="font-semibold">Traveler Fee (TF)</b>. The total amount is secured in Escrow.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="connector"><div class="arrow-down"></div></div>
+
+                <!-- STEP 2: Matching -->
+                <div class="step-card border-l-4 border-green-600">
+                    <div class="flex items-start">
+                        <span class="text-3xl font-extrabold text-green-600 mr-4">02</span>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-900">Matching Engine Finds Agent</h4>
+                            <p class="text-gray-600">Our algorithm matches the request to a <b class="font-semibold">vetted Agent</b> (commuter) whose daily travel route and schedule perfectly align with the shop and drop-off points.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="connector"><div class="arrow-down"></div></div>
+
+                <!-- STEP 3: Purchase -->
+                <div class="step-card border-l-4 border-yellow-500">
+                    <div class="flex items-start">
+                        <span class="text-3xl font-extrabold text-yellow-500 mr-4">03</span>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-900">Agent Purchases Item</h4>
+                            <p class="text-gray-600">The Agent accepts the task and uses their own funds (or a company float) to <b class="font-semibold">buy the product</b> from the specified local Vendor (Shop).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="connector"><div class="arrow-down"></div></div>
+
+                <!-- STEP 4: Verification -->
+                <div class="step-card border-l-4 border-red-500">
+                    <div class="flex items-start">
+                        <span class="text-3xl font-extrabold text-red-500 mr-4">04</span>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-900">Digital Verification (Proof of Purchase)</h4>
+                            <p class="text-gray-600">The Agent uploads a <b class="font-semibold">digitally verified receipt/invoice</b> and geo-fenced proof of purchase. This step is critical to confirm item value before delivery.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="connector"><div class="arrow-down"></div></div>
+
+                <!-- STEP 5: Delivery -->
+                <div class="step-card border-l-4 border-indigo-600">
+                    <div class="flex items-start">
+                        <span class="text-3xl font-extrabold text-indigo-600 mr-4">05</span>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-900">Delivery Aligned with Commute</h4>
+                            <p class="text-gray-600">The Agent continues their journey, delivering the item to the Requester's location as a quick, scheduled stop along their normal route.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="connector"><div class="arrow-down"></div></div>
+
+                <!-- STEP 6: Confirmation -->
+                <div class="step-card border-l-4 border-teal-600">
+                    <div class="flex items-start">
+                        <span class="text-3xl font-extrabold text-teal-600 mr-4">06</span>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-900">Requester Confirms Delivery</h4>
+                            <p class="text-gray-600">Upon receiving the item, the Requester enters a <b class="font-semibold">unique PIN/OTP</b> in the Agent’s app. This action triggers the successful completion of the delivery contract.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="connector"><div class="arrow-down"></div></div>
+
+                <!-- STEP 7: Escrow Release -->
+                <div class="step-card border-l-4 border-purple-600">
+                    <div class="flex items-start">
+                        <span class="text-3xl font-extrabold text-purple-600 mr-4">07</span>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-900">Escrow Release and Payment</h4>
+                            <p class="text-gray-600">The Escrow system instantly releases the <b class="font-semibold">item's cost (reimbursement)</b> plus the Agent's deserved <b class="font-semibold">Traveler Fee</b> to the Agent's account.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- DEDICATED STORY & SAFETY PAGE -->
+    <div id="story-safety-view" class="hidden py-16">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <button onclick="showHomePage(event)" class="text-blue-600 hover:text-blue-800 flex items-center mb-8 font-medium transition duration-150">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Home
+            </button>
+
+            <h2 class="text-4xl font-extrabold text-center mb-4 text-gray-900">
+                The PathRun Story, Safety, and Commitment
+            </h2>
+            <p class="text-center text-xl text-gray-500 mb-12 max-w-2xl mx-auto">
+                Our vision is built on efficiency and trust, creating a decentralized logistics network for the future.
+            </p>
+
+            <!-- 1. THE PATHRUN STORY -->
+            <div class="bg-white p-8 rounded-2xl card-shadow border-t-4 border-green-600 mb-12">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Our Core Vision: Peer-to-Peer Efficiency
+                </h3>
+                <p class="text-gray-700 mb-4 leading-relaxed">
+                    PathRun was created to solve a simple problem: why pay high logistics costs for local delivery when millions of people are already commuting the required distances every day? We developed a Peer-to-Peer (P2P) Delivery Platform that taps into the unused capacity of daily commuters, whom we call <b class="font-semibold">Agents</b>, to fulfill local product requests. This model cuts traditional overhead, offering customers a faster service at a much lower cost.
+                </p>
+                
+                <h4 class="text-xl font-semibold text-gray-800 mt-6 mb-3">The Three-Party Ecosystem</h4>
+                <p class="text-gray-600">
+                    Our platform acts as a precise matchmaker connecting three key players:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4 mt-3">
+                    <li>The <b class="font-semibold">Requester</b> (Customer): Needs any product purchased and delivered from a specific local shop.</li>
+                    <li>The <b class="font-semibold">Vendor</b> (Shop): Supplies the product locally (physical presence only, no deep digital integration needed).</li>
+                    <li>The <b class="font-semibold">Traveler (Agent)</b>: A daily commuter (worker/student) traveling between two fixed points who buys and delivers the requested item en route for a commission.</li>
+                </ul>
+            </div>
+
+
+            <!-- 2. PAYMENT SAFETY SECTION -->
+            <div class="bg-white p-8 rounded-2xl card-shadow border-t-4 border-blue-600 mb-12">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Payment Security: The Escrow Guarantee
+                </h3>
+                <p class="text-gray-700 mb-4 leading-relaxed">
+                    Your financial safety is our highest priority, guaranteed by our non-negotiable <b class="font-semibold">Escrow System</b>.
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                    <li><b class="font-semibold">Requester Protection:</b> Your payment (item cost + Agent fee) is <b class="font-semibold">held securely</b> by PathRun and is only released after you confirm successful delivery.</li>
+                    <li><b class="font-semibold">Agent Reimbursement:</b> The Agent is guaranteed reimbursement for the product they purchase, provided they successfully complete the delivery and verification steps.</li>
+                    <li><b class="font-semibold">Final Confirmation:</b> Delivery is confirmed only when you provide the <b class="font-semibold">unique, one-time PIN (OTP)</b> to the Agent upon receiving the item. No PIN, no release of funds.</li>
+                </ul>
+            </div>
+
+            <!-- 3. PRODUCT SAFETY & LIABILITY SECTION -->
+            <div class="bg-white p-8 rounded-2xl card-shadow border-t-4 border-red-600">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.003 12.003 0 002.944 12c.045 2.534.549 5.013 1.567 7.37C5.976 21.054 8.79 22 12 22c3.21 0 6.024-.946 7.489-2.63c1.018-2.357 1.522-4.836 1.567-7.37.002-3.83-.497-7.49-1.567-10.056z" />
+                    </svg>
+                    Product Integrity and Agent Liability
+                </h3>
+                <p class="text-gray-700 mb-4 leading-relaxed">
+                    We ensure the integrity of your product through stringent vetting and a clear liability framework.
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                    <li><b class="font-semibold">Agent Accountability:</b> Every Agent is thoroughly vetted and agrees to a detailed liability contract. Once they purchase the item, they take <b class="font-semibold">full contractual responsibility</b> for its safe storage and transport.</li>
+                    <li><b class="font-semibold">Proof of Purchase:</b> Agents must upload a <b class="font-semibold">digitally verified receipt and geo-fenced proof</b> that the correct item was bought, minimizing the risk of incorrect delivery.</li>
+                    <li><b class="font-semibold">Damage and Loss Policy:</b> If the product arrives <b class="font-semibold">damaged, incorrect, or is lost in transit</b>, the Agent is held entirely liable. The Escrow funds are not released, ensuring you are immediately protected and will receive a full refund.</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-sm">&copy; 2025 PathRun. All rights reserved. P2P Delivery Platform.</p>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+                <a href="#" class="text-gray-400 hover:text-white transition duration-150 text-sm">Privacy Policy</a>
+                <a href="#" class="text-gray-400 hover:text-white transition duration-150 text-sm">Terms of Service</a>
+                <a href="#" class="text-gray-400 hover:text-white transition duration-150 text-sm">Agent Agreement</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const homeView = document.getElementById('home-view');
+        const workflowView = document.getElementById('workflow-view');
+        const storySafetyView = document.getElementById('story-safety-view'); 
+        const requestFormView = document.getElementById('request-form-view'); 
+        const agentApplicationView = document.getElementById('agent-application-view'); // Agent Application View
+        
+        const navHome = document.getElementById('nav-home');
+        const navHow = document.getElementById('nav-how');
+        const navTrust = document.getElementById('nav-trust'); 
+        const navAgents = document.getElementById('nav-agents'); 
+        
+        const submitButton = document.getElementById('submit-button');
+        const agentCountElement = document.getElementById('agent-count');
+        const statusMessage = document.getElementById('status-message');
+        const agentStatusMessage = document.getElementById('agent-status-message');
+
+
+        // --- Simulated/Mock Data and Logic ---
+        const MOCK_API_KEY = "YOUR_MOCK_GOOGLE_MAPS_API_KEY"; // Placeholder key
+        const MOCK_AGENT_COUNT = 15; // Mock number of available agents
+
+        function getAvailableAgents() {
+            // In a real app, this would be an async API call to check available agents based on geo-location.
+            return MOCK_AGENT_COUNT;
+        }
+
+        function updateAgentCount() {
+            const count = getAvailableAgents();
+            agentCountElement.textContent = count > 0 ? count : '0';
+            
+            // Enable or disable the submit button based on agent availability
+            if (count > 0) {
+                submitButton.disabled = false;
+                submitButton.classList.remove('disabled:bg-gray-400', 'bg-red-600');
+                submitButton.classList.add('bg-green-600', 'hover:bg-green-700');
+            } else {
+                submitButton.disabled = true;
+                submitButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+                submitButton.classList.add('disabled:bg-gray-400', 'bg-red-600');
+            }
+        }
+
+        // --- Google Maps Autocomplete Implementation ---
+
+        let autocomplete;
+
+        // Called automatically when the Google Maps script loads (see script tag below)
+        function initAutocomplete() {
+            const locationInput = document.getElementById('location-input');
+            
+            // Wait until the input element is ready (it's inside a hidden div, but usually works if script loads after DOM)
+            if (locationInput) {
+                // Restrict results to geographical locations (addresses)
+                autocomplete = new google.maps.places.Autocomplete(locationInput, {
+                    types: ['geocode'],
+                    componentRestrictions: { country: [] } // allow all countries for demo
+                });
+
+                // Optional: Listen for the place selection event
+                autocomplete.addListener('place_changed', () => {
+                    const place = autocomplete.getPlace();
+                    console.log('Selected Location:', place.formatted_address);
+                    // You could store lat/lng here: place.geometry.location.lat() / lng()
+                });
+            } else {
+                console.error("Location input element not found for Autocomplete initialization.");
+            }
+        }
+
+        // Helper function to dynamically load the Google Maps script
+        function loadGoogleMapsScript() {
+            if (document.querySelector(`script[src*="maps.googleapis.com"]`)) {
+                return; // Script already exists
+            }
+
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${MOCK_API_KEY}&libraries=places&callback=initAutocomplete`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+
+        // --- Navigation and Form Handling ---
+
+        // Helper to reset nav styles
+        function resetNavStyles() {
+            [navHome, navHow, navTrust, navAgents].forEach(nav => {
+                if (nav) {
+                    nav.classList.remove('font-bold', 'text-green-600');
+                    nav.classList.add('text-gray-600');
+                }
+            });
+        }
+
+        // Helper to show a specific view and hide others
+        function showView(viewToShow, navToHighlight) {
+            [homeView, workflowView, storySafetyView, requestFormView, agentApplicationView].forEach(view => {
+                if (view === viewToShow) {
+                    view.classList.remove('hidden');
+                } else {
+                    view.classList.add('hidden');
+                }
+            });
+
+            resetNavStyles();
+            if (navToHighlight) {
+                navToHighlight.classList.add('font-bold', 'text-green-600');
+                navToHighlight.classList.remove('text-gray-600');
+            }
+
+            // Manage Home button visibility
+            if (viewToShow === homeView) {
+                 if (navHome) navHome.classList.add('hidden');
+            } else {
+                 if (navHome) navHome.classList.remove('hidden');
+            }
+            
+            // Special logic for request form view
+            if (viewToShow === requestFormView) {
+                updateAgentCount();
+                // Ensure autocomplete is initialized if the map script is loaded
+                if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
+                    // Check if initAutocomplete was missed or if we need to call it again for safety
+                    if (!autocomplete) {
+                        initAutocomplete();
+                    }
+                }
+            }
+
+            window.scrollTo(0, 0); // Scroll to top of the new view
+        }
+
+        // Function to show the detailed request form page
+        function showRequestForm(event) {
+            if (event) event.preventDefault();
+            showView(requestFormView, null); 
+        }
+
+        // Function to show the detailed workflow page
+        function showWorkflowPage(event) {
+            if (event) event.preventDefault();
+            showView(workflowView, navHow);
+        }
+
+        // Function to show the detailed story/trust page
+        function showTrustPage(event) {
+            if (event) event.preventDefault();
+            showView(storySafetyView, navTrust);
+        }
+
+        // Function to show the detailed agent application page
+        function showAgentApplicationPage(event) {
+            if (event) event.preventDefault();
+            showView(agentApplicationView, navAgents);
+        }
+
+        // Function to show the main landing page
+        function showHomePage(event) {
+            if (event) event.preventDefault();
+            showView(homeView, null); // No nav item highlighted for home page initially
+        }
+
+        // Function for internal anchor links when on the home page
+        function scrollToSection(event, sectionId) {
+            if (event) event.preventDefault();
+            showHomePage(); // Ensure we are on the home page first
+            
+            // Wait for the view transition to complete 
+            setTimeout(() => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 50);
+        }
+
+        // Form Submission Handler (Mock)
+        function handleRequestSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const data = {
+                product: form['product-name'].value,
+                shop: form['shop-name'].value,
+                quantity: form['quantity'].value,
+                location: form['location-input'].value,
+            };
+            
+            statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700');
+            statusMessage.classList.add('bg-green-100', 'text-green-700');
+            statusMessage.innerHTML = `<b>Request Submitted!</b><br>Product: ${data.product}, Drop-off: ${data.location}. A quote will be generated shortly.`;
+            
+            // Clear the form fields after successful (mock) submission
+            form.reset();
+        }
+
+        // Agent Form Submission Handler (Mock)
+        function handleAgentSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const data = {
+                name: form['agent_name'].value,
+                phone: form['agent_phone'].value,
+                from: form['travel_from'].value,
+                to: form['travel_to'].value,
+                time: form['travel_time'].value,
+                days: Array.from(form['working_days'].selectedOptions).map(option => option.value),
+                address: form['permanent_address'].value,
+                id_proof: form['id_proof'].files.length > 0 ? form['id_proof'].files[0].name : 'N/A',
+                photo: form['photo_upload'].files.length > 0 ? form['photo_upload'].files[0].name : 'N/A',
+                address_proof: form['address_proof'].files.length > 0 ? form['address_proof'].files[0].name : 'N/A',
+            };
+            
+            // Check required file uploads
+            if (form['id-proof'].files.length === 0 || form['photo-upload'].files.length === 0 || form['address-proof'].files.length === 0) {
+                 agentStatusMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700');
+                 agentStatusMessage.classList.add('bg-red-100', 'text-red-700');
+                 agentStatusMessage.innerHTML = '<b>Error:</b> Please ensure all mandatory documents are uploaded.';
+                 return;
+            }
+
+            console.log('Agent Application Data:', data);
+            
+            agentStatusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700');
+            agentStatusMessage.classList.add('bg-green-100', 'text-green-700');
+            agentStatusMessage.innerHTML = `<b>Application Received!</b><br>Thanks, ${data.name}. We will review your documents and commute profile (${data.from} to ${data.to}) for vetting.`;
+            
+            // In a real app, this data would be sent to a backend for verification and storage.
+            form.reset();
+            updateFileName('id-proof-name', []);
+            updateFileName('photo-upload-name', []);
+            updateFileName('address-proof-name', []);
+        }
+
+        // Function to update the file name display
+        function updateFileName(elementId, files) {
+            const fileNameElement = document.getElementById(elementId);
+            if (files && files.length > 0) {
+                fileNameElement.textContent = files[0].name;
+            } else {
+                fileNameElement.textContent = 'No file selected.';
+            }
+        }
+
+        // Initialize state: Ensure Home is the default view and load Google Maps script
+        window.onload = function() {
+            showHomePage();
+            loadGoogleMapsScript();
+        }
+    </script>
+    <!-- Google Maps script is loaded dynamically in JS and calls initAutocomplete when ready -->
+
+</body>
+</html>
